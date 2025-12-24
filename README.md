@@ -39,9 +39,8 @@ Nuxt 4とPostgreSQLを使用したフルスタックTODOアプリケーション
 
 ### 前提条件
 - Docker & Docker Compose がインストールされていること
-- Node.js 22.21.1 以上（フロントエンド開発用）
 
-### 1. Docker Compose でバックエンドとDBを起動
+### Docker Compose で全サービスを起動（推奨）
 
 ```bash
 # プロジェクトルートで実行
@@ -51,20 +50,29 @@ docker-compose up -d
 これにより以下のサービスが起動します：
 - PostgreSQL（ポート: 5432）
 - バックエンドサーバー（ポート: 3001）
+- フロントエンド（ポート: 3000）
 
-### 2. フロントエンドを起動
+### ブラウザでアクセス
 
-別のターミナルで：
+http://localhost:3000 を開いてTODOアプリを使用できます
+
+### ローカル開発（Dockerを使わない場合）
+
+#### 1. バックエンドとDBを起動
 
 ```bash
+docker-compose up -d db backend
+```
+
+#### 2. フロントエンドをローカルで起動
+
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
 フロントエンドは http://localhost:3000 で起動します
-
-### 3. ブラウザでアクセス
-
-http://localhost:3000 を開いてTODOアプリを使用できます
 
 ## API エンドポイント
 
@@ -99,10 +107,15 @@ TODOを削除
 
 ## 開発
 
-### バックエンドのみ起動
+### 個別サービスの起動
 
 ```bash
+# バックエンドのみ
 cd backend
+npm run dev
+
+# フロントエンドのみ
+cd frontend
 npm run dev
 ```
 
@@ -118,6 +131,7 @@ npm run db:migrate   # マイグレーションを実行
 
 ```bash
 docker-compose logs -f backend
+docker-compose logs -f frontend
 docker-compose logs -f db
 ```
 
@@ -138,20 +152,24 @@ docker-compose up -d
 
 ```
 .
-├── app.vue                 # Nuxt フロントエンド
-├── nuxt.config.ts          # Nuxt設定
+├── frontend/
+│   ├── app.vue             # Nuxt メインコンポーネント
+│   ├── nuxt.config.ts      # Nuxt設定
+│   ├── Dockerfile
+│   └── package.json
 ├── backend/
 │   ├── src/
 │   │   ├── index.ts        # Expressサーバー
 │   │   ├── routes/
-│   │   │   └── todos.ts    # TODOルート
+│   │   │   └── todos.ts    # TODOルート (CRUD API)
 │   │   └── db/
-│   │       ├── schema.ts   # DBスキーマ
+│   │       ├── schema.ts   # DBスキーマ (UUID主キー)
 │   │       ├── index.ts    # DB接続
 │   │       └── migrate.ts  # マイグレーション
 │   ├── Dockerfile
 │   └── package.json
-└── docker-compose.yml
+├── docker-compose.yml      # 全サービスの統合管理
+└── README.md
 ```
 
 ## ライセンス
