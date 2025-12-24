@@ -1,17 +1,23 @@
 <script setup lang="ts">
 interface Todo {
-  id: number
+  id: string
   text: string
   completed: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
 type FilterType = 'all' | 'active' | 'completed'
 
+const API_URL = 'http://localhost:3001/api/todos'
+
 const newTodo = ref('')
 const todos = ref<Todo[]>([])
 const filter = ref<FilterType>('all')
-const editingId = ref<number | null>(null)
+const editingId = ref<string | null>(null)
 const editingText = ref('')
+const loading = ref(false)
+const error = ref<string | null>(null)
 
 const filteredTodos = computed(() => {
   if (filter.value === 'active') {
@@ -27,25 +33,77 @@ const activeTodosCount = computed(() => {
   return todos.value.filter(todo => !todo.completed).length
 })
 
-const addTodo = () => {
-  if (newTodo.value.trim()) {
-    todos.value.push({
-      id: Date.now(),
-      text: newTodo.value.trim(),
-      completed: false
-    })
-    newTodo.value = ''
+// TODOリストを取得
+const fetchTodos = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    const data = await $fetch<Todo[]>(API_URL)
+    todos.value = data
+  } catch (e) {
+    error.value = 'TODOの取得に失敗しました'
+    console.error('Error fetching todos:', e)
+  } finally {
+    loading.value = false
   }
 }
 
-const removeTodo = (id: number) => {
-  todos.value = todos.value.filter(todo => todo.id !== id)
+// TODOを追加
+const addTodo = async () => {
+  if (!newTodo.value.trim()) return
+
+  try {
+    loading.value = true
+    error.value = null
+    const todo = await $fetch<Todo>(API_URL, {
+      method: 'POST',
+      body: { text: newTodo.value.trim() }
+    })
+    todos.value.push(todo)
+    newTodo.value = ''
+  } catch (e) {
+    error.value = 'TODOの追加に失敗しました'
+    console.error('Error adding todo:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
-const toggleTodo = (id: number) => {
+// TODOを削除
+const removeTodo = async (id: string) => {
+  try {
+    loading.value = true
+    error.value = null
+    await $fetch(`${API_URL}/${id}`, {
+      method: 'DELETE'
+    })
+    todos.value = todos.value.filter(todo => todo.id !== id)
+  } catch (e) {
+    error.value = 'TODOの削除に失敗しました'
+    console.error('Error deleting todo:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+// TODOの完了状態を切り替え
+const toggleTodo = async (id: string) => {
   const todo = todos.value.find(t => t.id === id)
-  if (todo) {
-    todo.completed = !todo.completed
+  if (!todo) return
+
+  try {
+    loading.value = true
+    error.value = null
+    const updated = await $fetch<Todo>(`${API_URL}/${id}`, {
+      method: 'PUT',
+      body: { completed: !todo.completed }
+    })
+    Object.assign(todo, updated)
+  } catch (e) {
+    error.value = 'TODOの更新に失敗しました'
+    console.error('Error toggling todo:', e)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -59,29 +117,57 @@ const cancelEdit = () => {
   editingText.value = ''
 }
 
-const saveEdit = (id: number) => {
-  const todo = todos.value.find(t => t.id === id)
-  if (todo && editingText.value.trim()) {
-    todo.text = editingText.value.trim()
+// TODOを編集
+const saveEdit = async (id: string) => {
+  if (!editingText.value.trim()) {
+    cancelEdit()
+    return
   }
-  cancelEdit()
+
+  try {
+    loading.value = true
+    error.value = null
+    const updated = await $fetch<Todo>(`${API_URL}/${id}`, {
+      method: 'PUT',
+      body: { text: editingText.value.trim() }
+    })
+    const todo = todos.value.find(t => t.id === id)
+    if (todo) {
+      Object.assign(todo, updated)
+    }
+    cancelEdit()
+  } catch (e) {
+    error.value = 'TODOの更新に失敗しました'
+    console.error('Error updating todo:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
-const handleKeydown = (e: KeyboardEvent, id: number) => {
+const handleKeydown = (e: KeyboardEvent, id: string) => {
   if (e.key === 'Enter') {
     saveEdit(id)
   } else if (e.key === 'Escape') {
     cancelEdit()
   }
 }
+
+// 初回読み込み時にTODOを取得
+onMounted(() => {
+  fetchTodos()
+})
 </script>
 
 <template>
   <div class="container">
     <header>
       <h1>TODO App</h1>
-      <p class="subtitle">Nuxt 4で作ったシンプルなTODOアプリ</p>
+      <p class="subtitle">Nuxt 4 + PostgreSQL バックエンド付きTODOアプリ</p>
     </header>
+
+    <div v-if="error" class="error-message">
+      {{ error }}
+    </div>
 
     <div class="todo-app">
       <div class="input-section">
@@ -215,6 +301,15 @@ h1 {
 .subtitle {
   color: #7f8c8d;
   font-size: 1rem;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .todo-app {
