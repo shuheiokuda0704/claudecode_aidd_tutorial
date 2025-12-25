@@ -1,0 +1,30 @@
+{
+  "name": "todo-app-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "lint": "pnpm run lint:backend && pnpm run lint:frontend",
+    "lint:backend": "cd backend && pnpm run lint",
+    "lint:frontend": "cd frontend && pnpm run lint",
+    "typecheck": "pnpm run typecheck:backend && pnpm run typecheck:frontend",
+    "typecheck:backend": "cd backend && pnpm run typecheck",
+    "typecheck:frontend": "cd frontend && pnpm run typecheck",
+    "test": "pnpm run test:backend",
+    "test:backend": "cd backend && pnpm run test"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0"
+  },
+  "lint-staged": {
+    "backend/**/*.{js,ts}": [
+      "cd backend && pnpm run lint:fix",
+      "cd backend && pnpm run format"
+    ],
+    "frontend/**/*.{js,ts,vue}": [
+      "cd frontend && pnpm run lint:fix",
+      "cd frontend && pnpm run format"
+    ]
+  }
+}

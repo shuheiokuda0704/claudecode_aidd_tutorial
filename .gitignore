@@ -1,6 +1,9 @@
 # Dependencies
 node_modules
 
+# Husky
+.husky/_
+
 # Misc
 .DS_Store
 .fleet
