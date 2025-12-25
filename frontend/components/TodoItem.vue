@@ -54,7 +54,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         :checked="todo.completed"
         class="todo-checkbox"
         @change="emit('toggle', todo.id)"
-      >
+      />
       <span
         v-if="!isEditing"
         :class="{ completed: todo.completed }"
@@ -71,7 +71,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         class="edit-input"
         @blur="saveEdit"
         @keydown="handleKeydown"
-      >
+      />
     </div>
     <div class="todo-actions">
       <button v-if="!isEditing" class="edit-btn" @click="startEdit">編集</button>

@@ -21,7 +21,7 @@ const handleAdd = () => {
       placeholder="新しいTODOを入力..."
       class="todo-input"
       @keydown.enter="handleAdd"
-    >
+    />
     <button class="add-btn" @click="handleAdd">追加</button>
   </div>
 </template>
