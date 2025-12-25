@@ -1,52 +1,64 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db/index.js';
 import { todos } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
+import { logger } from '../lib/logger.js';
+import { AppError } from '../middleware/errorHandler.js';
+import {
+  createTodoSchema,
+  updateTodoSchema,
+  uuidSchema,
+} from '../lib/validation.js';
 
 const router = Router();
 
 // GET /api/todos - 全TODOを取得
-router.get('/', async (_req, res) => {
+router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
+    logger.debug('Fetching all todos');
     const allTodos = await db.select().from(todos);
+    logger.info({ count: allTodos.length }, 'Todos fetched successfully');
     res.json(allTodos);
   } catch (error) {
-    console.error('Error fetching todos:', error);
-    res.status(500).json({ error: 'Failed to fetch todos' });
+    logger.error({ err: error }, 'Failed to fetch todos');
+    next(error);
   }
 });
 
 // POST /api/todos - 新しいTODOを作成
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { text } = req.body;
+    const validatedData = createTodoSchema.parse(req.body);
 
-    if (!text || text.trim() === '') {
-      return res.status(400).json({ error: 'Text is required' });
-    }
-
+    logger.debug({ text: validatedData.text }, 'Creating new todo');
     const [newTodo] = await db
       .insert(todos)
-      .values({ text: text.trim(), completed: false })
+      .values({ text: validatedData.text.trim(), completed: false })
       .returning();
 
+    logger.info({ todoId: newTodo.id }, 'Todo created successfully');
     res.status(201).json(newTodo);
   } catch (error) {
-    console.error('Error creating todo:', error);
-    res.status(500).json({ error: 'Failed to create todo' });
+    logger.error({ err: error }, 'Failed to create todo');
+    next(error);
   }
 });
 
 // PUT /api/todos/:id - TODOを更新
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const { text, completed } = req.body;
+    const id = uuidSchema.parse(req.params.id);
+    const validatedData = updateTodoSchema.parse(req.body);
 
     const updateData: any = { updatedAt: new Date() };
-    if (text !== undefined) updateData.text = text;
-    if (completed !== undefined) updateData.completed = completed;
+    if (validatedData.text !== undefined) {
+      updateData.text = validatedData.text.trim();
+    }
+    if (validatedData.completed !== undefined) {
+      updateData.completed = validatedData.completed;
+    }
 
+    logger.debug({ todoId: id, updates: updateData }, 'Updating todo');
     const [updatedTodo] = await db
       .update(todos)
       .set(updateData)
@@ -54,35 +66,41 @@ router.put('/:id', async (req, res) => {
       .returning();
 
     if (!updatedTodo) {
-      return res.status(404).json({ error: 'Todo not found' });
+      throw new AppError(404, 'Todo not found');
     }
 
+    logger.info({ todoId: id }, 'Todo updated successfully');
     res.json(updatedTodo);
   } catch (error) {
-    console.error('Error updating todo:', error);
-    res.status(500).json({ error: 'Failed to update todo' });
+    logger.error({ err: error }, 'Failed to update todo');
+    next(error);
   }
 });
 
 // DELETE /api/todos/:id - TODOを削除
-router.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+router.delete(
+  '/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = uuidSchema.parse(req.params.id);
 
-    const [deletedTodo] = await db
-      .delete(todos)
-      .where(eq(todos.id, id))
-      .returning();
+      logger.debug({ todoId: id }, 'Deleting todo');
+      const [deletedTodo] = await db
+        .delete(todos)
+        .where(eq(todos.id, id))
+        .returning();
 
-    if (!deletedTodo) {
-      return res.status(404).json({ error: 'Todo not found' });
+      if (!deletedTodo) {
+        throw new AppError(404, 'Todo not found');
+      }
+
+      logger.info({ todoId: id }, 'Todo deleted successfully');
+      res.json({ message: 'Todo deleted successfully', todo: deletedTodo });
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to delete todo');
+      next(error);
     }
-
-    res.json({ message: 'Todo deleted successfully', todo: deletedTodo });
-  } catch (error) {
-    console.error('Error deleting todo:', error);
-    res.status(500).json({ error: 'Failed to delete todo' });
-  }
-});
+  },
+);
 
 export default router;

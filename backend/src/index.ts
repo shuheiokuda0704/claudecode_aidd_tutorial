@@ -1,24 +1,34 @@
-import express from 'express';
-import cors from 'cors';
-import todosRouter from './routes/todos.js';
-
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Routes
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', message: 'Server is running' });
-});
-
-app.use('/api/todos', todosRouter);
+import { app } from './app.js';
+import { config } from './lib/config.js';
+import { logger } from './lib/logger.js';
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
-  console.log(`API endpoint: http://localhost:${PORT}/api/todos`);
+const server = app.listen(config.PORT, () => {
+  logger.info(
+    {
+      port: config.PORT,
+      environment: config.NODE_ENV,
+    },
+    'Server started successfully',
+  );
+  logger.info(`Health check: http://localhost:${config.PORT}/health`);
+  logger.info(`API endpoint: http://localhost:${config.PORT}/api/todos`);
+  logger.info(`API documentation: http://localhost:${config.PORT}/api-docs`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
 });
