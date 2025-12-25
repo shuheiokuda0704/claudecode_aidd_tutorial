@@ -105,6 +105,10 @@ jobs:
         working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare Nuxt
+        working-directory: ./frontend
+        run: pnpm exec nuxt prepare
+
       - name: Run ESLint
         working-directory: ./frontend
         run: pnpm run lint
