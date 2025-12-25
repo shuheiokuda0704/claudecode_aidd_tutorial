@@ -4,11 +4,7 @@ import { todos } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { logger } from '../lib/logger.js';
 import { AppError } from '../middleware/errorHandler.js';
-import {
-  createTodoSchema,
-  updateTodoSchema,
-  uuidSchema,
-} from '../lib/validation.js';
+import { createTodoSchema, updateTodoSchema, uuidSchema } from '../lib/validation.js';
 
 const router = Router();
 
@@ -50,7 +46,9 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     const id = uuidSchema.parse(req.params.id);
     const validatedData = updateTodoSchema.parse(req.body);
 
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: { text?: string; completed?: boolean; updatedAt: Date } = {
+      updatedAt: new Date(),
+    };
     if (validatedData.text !== undefined) {
       updateData.text = validatedData.text.trim();
     }
@@ -78,29 +76,23 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // DELETE /api/todos/:id - TODOを削除
-router.delete(
-  '/:id',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const id = uuidSchema.parse(req.params.id);
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = uuidSchema.parse(req.params.id);
 
-      logger.debug({ todoId: id }, 'Deleting todo');
-      const [deletedTodo] = await db
-        .delete(todos)
-        .where(eq(todos.id, id))
-        .returning();
+    logger.debug({ todoId: id }, 'Deleting todo');
+    const [deletedTodo] = await db.delete(todos).where(eq(todos.id, id)).returning();
 
-      if (!deletedTodo) {
-        throw new AppError(404, 'Todo not found');
-      }
-
-      logger.info({ todoId: id }, 'Todo deleted successfully');
-      res.json({ message: 'Todo deleted successfully', todo: deletedTodo });
-    } catch (error) {
-      logger.error({ err: error }, 'Failed to delete todo');
-      next(error);
+    if (!deletedTodo) {
+      throw new AppError(404, 'Todo not found');
     }
-  },
-);
+
+    logger.info({ todoId: id }, 'Todo deleted successfully');
+    res.json({ message: 'Todo deleted successfully', todo: deletedTodo });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to delete todo');
+    next(error);
+  }
+});
 
 export default router;

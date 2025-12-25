@@ -10,16 +10,16 @@ export const useTodos = () => {
   // Computed properties
   const filteredTodos = computed(() => {
     if (filter.value === 'active') {
-      return todos.value.filter(todo => !todo.completed)
+      return todos.value.filter((todo) => !todo.completed)
     }
     if (filter.value === 'completed') {
-      return todos.value.filter(todo => todo.completed)
+      return todos.value.filter((todo) => todo.completed)
     }
     return todos.value
   })
 
   const activeTodosCount = computed(() => {
-    return todos.value.filter(todo => !todo.completed).length
+    return todos.value.filter((todo) => !todo.completed).length
   })
 
   // API functions
@@ -45,7 +45,7 @@ export const useTodos = () => {
       error.value = null
       const todo = await $fetch<Todo>(API_ENDPOINTS.todos, {
         method: 'POST',
-        body: { text: text.trim() }
+        body: { text: text.trim() },
       })
       todos.value.push(todo)
     } catch (e) {
@@ -62,9 +62,9 @@ export const useTodos = () => {
       loading.value = true
       error.value = null
       await $fetch(`${API_ENDPOINTS.todos}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       })
-      todos.value = todos.value.filter(todo => todo.id !== id)
+      todos.value = todos.value.filter((todo) => todo.id !== id)
     } catch (e) {
       error.value = 'TODOの削除に失敗しました'
       console.error('Error deleting todo:', e)
@@ -75,7 +75,7 @@ export const useTodos = () => {
   }
 
   const toggleTodo = async (id: string) => {
-    const todo = todos.value.find(t => t.id === id)
+    const todo = todos.value.find((t) => t.id === id)
     if (!todo) return
 
     try {
@@ -83,7 +83,7 @@ export const useTodos = () => {
       error.value = null
       const updated = await $fetch<Todo>(`${API_ENDPOINTS.todos}/${id}`, {
         method: 'PUT',
-        body: { completed: !todo.completed }
+        body: { completed: !todo.completed },
       })
       Object.assign(todo, updated)
     } catch (e) {
@@ -103,9 +103,9 @@ export const useTodos = () => {
       error.value = null
       const updated = await $fetch<Todo>(`${API_ENDPOINTS.todos}/${id}`, {
         method: 'PUT',
-        body: { text: text.trim() }
+        body: { text: text.trim() },
       })
-      const todo = todos.value.find(t => t.id === id)
+      const todo = todos.value.find((t) => t.id === id)
       if (todo) {
         Object.assign(todo, updated)
       }

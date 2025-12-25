@@ -19,10 +19,10 @@ const handleAdd = () => {
       v-model="newTodo"
       type="text"
       placeholder="新しいTODOを入力..."
-      @keydown.enter="handleAdd"
       class="todo-input"
-    />
-    <button @click="handleAdd" class="add-btn">追加</button>
+      @keydown.enter="handleAdd"
+    >
+    <button class="add-btn" @click="handleAdd">追加</button>
   </div>
 </template>
 

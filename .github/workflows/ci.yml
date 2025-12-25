@@ -54,7 +54,7 @@ jobs:
         run: pnpm run build
 
   backend-lint:
-    name: Backend Lint
+    name: Backend Lint & Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -73,9 +73,49 @@ jobs:
         working-directory: ./backend
         run: pnpm install --frozen-lockfile
 
+      - name: Run ESLint
+        working-directory: ./backend
+        run: pnpm run lint
+
+      - name: Check formatting
+        working-directory: ./backend
+        run: pnpm run format:check
+
       - name: Type check
         working-directory: ./backend
-        run: pnpm run build
+        run: pnpm run typecheck
+
+  frontend-lint:
+    name: Frontend Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: pnpm run lint
+
+      - name: Check formatting
+        working-directory: ./frontend
+        run: pnpm run format:check
+
+      - name: Type check
+        working-directory: ./frontend
+        run: pnpm run typecheck
 
   frontend-build:
     name: Frontend Build
@@ -104,7 +144,7 @@ jobs:
   docker-build:
     name: Docker Build Test
     runs-on: ubuntu-latest
-    needs: [backend-test, backend-lint, frontend-build]
+    needs: [backend-test, backend-lint, frontend-lint, frontend-build]
 
     steps:
       - name: Checkout code

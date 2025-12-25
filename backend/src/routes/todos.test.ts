@@ -66,9 +66,7 @@ describe('TODO API', () => {
         text: 'Updated todo text',
       };
 
-      const response = await request(app)
-        .put(`/api/todos/${createdTodoId}`)
-        .send(updatedText);
+      const response = await request(app).put(`/api/todos/${createdTodoId}`).send(updatedText);
 
       expect(response.status).toBe(200);
       expect(response.body.text).toBe(updatedText.text);
@@ -86,9 +84,7 @@ describe('TODO API', () => {
     });
 
     it('should fail with invalid UUID', async () => {
-      const response = await request(app)
-        .put('/api/todos/invalid-uuid')
-        .send({ text: 'Test' });
+      const response = await request(app).put('/api/todos/invalid-uuid').send({ text: 'Test' });
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('status', 'error');
@@ -96,9 +92,7 @@ describe('TODO API', () => {
 
     it('should fail when todo not found', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const response = await request(app)
-        .put(`/api/todos/${nonExistentId}`)
-        .send({ text: 'Test' });
+      const response = await request(app).put(`/api/todos/${nonExistentId}`).send({ text: 'Test' });
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('status', 'error');
@@ -106,9 +100,7 @@ describe('TODO API', () => {
     });
 
     it('should fail with no fields provided', async () => {
-      const response = await request(app)
-        .put(`/api/todos/${createdTodoId}`)
-        .send({});
+      const response = await request(app).put(`/api/todos/${createdTodoId}`).send({});
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('status', 'error');
@@ -117,15 +109,10 @@ describe('TODO API', () => {
 
   describe('DELETE /api/todos/:id', () => {
     it('should delete a todo', async () => {
-      const response = await request(app).delete(
-        `/api/todos/${createdTodoId}`,
-      );
+      const response = await request(app).delete(`/api/todos/${createdTodoId}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty(
-        'message',
-        'Todo deleted successfully',
-      );
+      expect(response.body).toHaveProperty('message', 'Todo deleted successfully');
       expect(response.body.todo.id).toBe(createdTodoId);
     });
 
@@ -138,9 +125,7 @@ describe('TODO API', () => {
 
     it('should fail when todo not found', async () => {
       const nonExistentId = '00000000-0000-0000-0000-000000000000';
-      const response = await request(app).delete(
-        `/api/todos/${nonExistentId}`,
-      );
+      const response = await request(app).delete(`/api/todos/${nonExistentId}`);
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('status', 'error');

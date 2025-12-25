@@ -2,7 +2,8 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/todo_db';
+const connectionString =
+  process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/todo_db';
 
 const main = async () => {
   const client = postgres(connectionString, { max: 1 });

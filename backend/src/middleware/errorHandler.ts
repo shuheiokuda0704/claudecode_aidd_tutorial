@@ -13,12 +13,7 @@ export class AppError extends Error {
   }
 }
 
-export const errorHandler = (
-  err: Error,
-  _req: Request,
-  res: Response,
-  _next: NextFunction,
-) => {
+export const errorHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
     logger.warn({ err, statusCode: err.statusCode }, err.message);
     return res.status(err.statusCode).json({
@@ -40,9 +35,7 @@ export const errorHandler = (
   logger.error({ err }, 'Unexpected error');
   return res.status(500).json({
     status: 'error',
-    message: process.env.NODE_ENV === 'production'
-      ? 'Internal server error'
-      : err.message,
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
   });
 };
 

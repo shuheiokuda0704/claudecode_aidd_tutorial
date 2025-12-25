@@ -14,23 +14,23 @@ const emit = defineEmits<{
 <template>
   <div class="filter-section">
     <button
-      @click="emit('updateFilter', 'all')"
       :class="{ active: currentFilter === 'all' }"
       class="filter-btn"
+      @click="emit('updateFilter', 'all')"
     >
       全て
     </button>
     <button
-      @click="emit('updateFilter', 'active')"
       :class="{ active: currentFilter === 'active' }"
       class="filter-btn"
+      @click="emit('updateFilter', 'active')"
     >
       進行中
     </button>
     <button
-      @click="emit('updateFilter', 'completed')"
       :class="{ active: currentFilter === 'completed' }"
       class="filter-btn"
+      @click="emit('updateFilter', 'completed')"
     >
       完了済み
     </button>
