@@ -11,7 +11,7 @@
     "test:ui": "NODE_ENV=test vitest --ui",
     "test:coverage": "NODE_ENV=test vitest --coverage",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/migrate.ts",
+    "db:migrate": "drizzle-kit migrate",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
