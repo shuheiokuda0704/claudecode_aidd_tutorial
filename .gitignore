@@ -1,7 +1,5 @@
 # Dependencies
 node_modules
-package.json
-pnpm-lock.yaml
 
 # Misc
 .DS_Store
