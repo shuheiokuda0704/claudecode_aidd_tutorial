@@ -1,7 +1,10 @@
 import type { Todo, FilterType } from '~/types/todo'
-import { API_ENDPOINTS } from '~/config/api'
+import { getApiEndpoints } from '~/config/api'
 
 export const useTodos = () => {
+  const config = useRuntimeConfig()
+  const apiEndpoints = getApiEndpoints(config.public.apiUrl as string)
+
   const todos = useState<Todo[]>('todos', () => [])
   const filter = useState<FilterType>('filter', () => 'all')
   const loading = useState('loading', () => false)
@@ -27,7 +30,7 @@ export const useTodos = () => {
     try {
       loading.value = true
       error.value = null
-      const data = await $fetch<Todo[]>(API_ENDPOINTS.todos)
+      const data = await $fetch<Todo[]>(apiEndpoints.todos)
       todos.value = data
     } catch (e) {
       error.value = 'TODOの取得に失敗しました'
@@ -43,7 +46,7 @@ export const useTodos = () => {
     try {
       loading.value = true
       error.value = null
-      const todo = await $fetch<Todo>(API_ENDPOINTS.todos, {
+      const todo = await $fetch<Todo>(apiEndpoints.todos, {
         method: 'POST',
         body: { text: text.trim() },
       })
@@ -51,7 +54,6 @@ export const useTodos = () => {
     } catch (e) {
       error.value = 'TODOの追加に失敗しました'
       console.error('Error adding todo:', e)
-      throw e
     } finally {
       loading.value = false
     }
@@ -61,14 +63,13 @@ export const useTodos = () => {
     try {
       loading.value = true
       error.value = null
-      await $fetch(`${API_ENDPOINTS.todos}/${id}`, {
+      await $fetch(`${apiEndpoints.todos}/${id}`, {
         method: 'DELETE',
       })
       todos.value = todos.value.filter((todo) => todo.id !== id)
     } catch (e) {
       error.value = 'TODOの削除に失敗しました'
       console.error('Error deleting todo:', e)
-      throw e
     } finally {
       loading.value = false
     }
@@ -81,7 +82,7 @@ export const useTodos = () => {
     try {
       loading.value = true
       error.value = null
-      const updated = await $fetch<Todo>(`${API_ENDPOINTS.todos}/${id}`, {
+      const updated = await $fetch<Todo>(`${apiEndpoints.todos}/${id}`, {
         method: 'PUT',
         body: { completed: !todo.completed },
       })
@@ -89,7 +90,6 @@ export const useTodos = () => {
     } catch (e) {
       error.value = 'TODOの更新に失敗しました'
       console.error('Error toggling todo:', e)
-      throw e
     } finally {
       loading.value = false
     }
@@ -101,7 +101,7 @@ export const useTodos = () => {
     try {
       loading.value = true
       error.value = null
-      const updated = await $fetch<Todo>(`${API_ENDPOINTS.todos}/${id}`, {
+      const updated = await $fetch<Todo>(`${apiEndpoints.todos}/${id}`, {
         method: 'PUT',
         body: { text: text.trim() },
       })
@@ -112,7 +112,6 @@ export const useTodos = () => {
     } catch (e) {
       error.value = 'TODOの更新に失敗しました'
       console.error('Error updating todo:', e)
-      throw e
     } finally {
       loading.value = false
     }

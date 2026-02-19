@@ -26,7 +26,7 @@ const getEmptyMessage = (filter: FilterType) => {
 
 <template>
   <div>
-    <ul v-if="todos.length > 0" class="todo-list">
+    <TransitionGroup v-if="todos.length > 0" name="list" tag="ul" class="todo-list">
       <TodoItem
         v-for="todo in todos"
         :key="todo.id"
@@ -35,7 +35,7 @@ const getEmptyMessage = (filter: FilterType) => {
         @remove="emit('remove', $event)"
         @update="(id, text) => emit('update', id, text)"
       />
-    </ul>
+    </TransitionGroup>
 
     <div v-else class="empty-state">
       <p>{{ getEmptyMessage(filter) }}</p>
@@ -54,5 +54,20 @@ const getEmptyMessage = (filter: FilterType) => {
   text-align: center;
   padding: 2rem;
   color: #95a5a6;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.list-move {
+  transition: transform 0.3s ease;
 }
 </style>

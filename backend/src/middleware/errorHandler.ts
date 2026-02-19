@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { logger } from '../lib/logger.js';
+import { config } from '../lib/config.js';
 
 export class AppError extends Error {
   constructor(
@@ -35,7 +36,7 @@ export const errorHandler = (err: Error, _req: Request, res: Response, _next: Ne
   logger.error({ err }, 'Unexpected error');
   return res.status(500).json({
     status: 'error',
-    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+    message: config.NODE_ENV === 'production' ? 'Internal server error' : err.message,
   });
 };
 

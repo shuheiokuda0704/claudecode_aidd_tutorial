@@ -48,8 +48,8 @@ app.use(
 );
 
 // Body parsing middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: false }));
 
 // Health check endpoint
 app.get('/health', async (_req, res) => {
@@ -72,7 +72,9 @@ app.get('/health', async (_req, res) => {
 });
 
 // API documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+if (config.NODE_ENV !== 'production') {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+}
 
 // API routes
 app.use('/api/todos', todosRouter);

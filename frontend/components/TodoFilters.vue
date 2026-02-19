@@ -16,6 +16,7 @@ const emit = defineEmits<{
     <button
       :class="{ active: currentFilter === 'all' }"
       class="filter-btn"
+      :aria-pressed="currentFilter === 'all'"
       @click="emit('updateFilter', 'all')"
     >
       全て
@@ -23,6 +24,7 @@ const emit = defineEmits<{
     <button
       :class="{ active: currentFilter === 'active' }"
       class="filter-btn"
+      :aria-pressed="currentFilter === 'active'"
       @click="emit('updateFilter', 'active')"
     >
       進行中
@@ -30,6 +32,7 @@ const emit = defineEmits<{
     <button
       :class="{ active: currentFilter === 'completed' }"
       class="filter-btn"
+      :aria-pressed="currentFilter === 'completed'"
       @click="emit('updateFilter', 'completed')"
     >
       完了済み

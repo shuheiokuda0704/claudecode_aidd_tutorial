@@ -10,7 +10,13 @@ const {
   toggleTodo,
   updateTodo,
   setFilter,
+  clearError,
 } = useTodos()
+
+useSeoMeta({
+  title: 'TODO App',
+  description: 'Nuxt 4 + PostgreSQL バックエンド付きTODOアプリ',
+})
 
 // 初回読み込み時にTODOを取得
 onMounted(() => {
@@ -25,7 +31,7 @@ onMounted(() => {
       <p class="subtitle">Nuxt 4 + PostgreSQL バックエンド付きTODOアプリ</p>
     </header>
 
-    <ErrorMessage :message="error" />
+    <ErrorMessage :message="error" @close="clearError" />
 
     <div class="todo-app">
       <TodoInput @add="addTodo" />

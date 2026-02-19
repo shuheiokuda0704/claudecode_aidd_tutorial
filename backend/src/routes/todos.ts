@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db/index.js';
 import { todos } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { logger } from '../lib/logger.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createTodoSchema, updateTodoSchema, uuidSchema } from '../lib/validation.js';
@@ -12,7 +12,7 @@ const router = Router();
 router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     logger.debug('Fetching all todos');
-    const allTodos = await db.select().from(todos);
+    const allTodos = await db.select().from(todos).orderBy(desc(todos.createdAt));
     logger.info({ count: allTodos.length }, 'Todos fetched successfully');
     res.json(allTodos);
   } catch (error) {
@@ -29,7 +29,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     logger.debug({ text: validatedData.text }, 'Creating new todo');
     const [newTodo] = await db
       .insert(todos)
-      .values({ text: validatedData.text.trim(), completed: false })
+      .values({ text: validatedData.text, completed: false })
       .returning();
 
     logger.info({ todoId: newTodo.id }, 'Todo created successfully');
@@ -50,7 +50,7 @@ router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
       updatedAt: new Date(),
     };
     if (validatedData.text !== undefined) {
-      updateData.text = validatedData.text.trim();
+      updateData.text = validatedData.text;
     }
     if (validatedData.completed !== undefined) {
       updateData.completed = validatedData.completed;

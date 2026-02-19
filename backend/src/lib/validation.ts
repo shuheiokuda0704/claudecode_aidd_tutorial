@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 export const createTodoSchema = z.object({
-  text: z.string().min(1, 'Text is required').max(500, 'Text is too long'),
+  text: z.string().trim().min(1, 'Text is required').max(500, 'Text is too long'),
 });
 
 export const updateTodoSchema = z
   .object({
-    text: z.string().min(1, 'Text is required').max(500, 'Text is too long').optional(),
+    text: z.string().trim().min(1, 'Text is required').max(500, 'Text is too long').optional(),
     completed: z.boolean().optional(),
   })
   .refine((data) => data.text !== undefined || data.completed !== undefined, {

@@ -37,6 +37,12 @@ const saveEdit = () => {
   }
 }
 
+const handleBlur = (e: FocusEvent) => {
+  const relatedTarget = e.relatedTarget as HTMLElement | null
+  if (relatedTarget?.closest('.todo-actions')) return
+  saveEdit()
+}
+
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
     saveEdit()
@@ -53,13 +59,19 @@ const handleKeydown = (e: KeyboardEvent) => {
         type="checkbox"
         :checked="todo.completed"
         class="todo-checkbox"
+        :aria-label="`${todo.text}を完了にする`"
         @change="emit('toggle', todo.id)"
       />
       <span
         v-if="!isEditing"
         :class="{ completed: todo.completed }"
         class="todo-text"
+        tabindex="0"
+        role="button"
+        :aria-label="`ダブルクリックで編集: ${todo.text}`"
         @dblclick="startEdit"
+        @keydown.enter="startEdit"
+        @keydown.f2="startEdit"
       >
         {{ todo.text }}
       </span>
@@ -69,7 +81,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         v-model="editingText"
         type="text"
         class="edit-input"
-        @blur="saveEdit"
+        @blur="handleBlur"
         @keydown="handleKeydown"
       />
     </div>

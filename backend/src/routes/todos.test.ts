@@ -49,6 +49,12 @@ describe('TODO API', () => {
       expect(response.body).toHaveProperty('status', 'error');
     });
 
+    it('should fail to create a todo with whitespace-only text', async () => {
+      const response = await request(app).post('/api/todos').send({ text: '   ' });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
     it('should fail to create a todo with text too long', async () => {
       const longText = 'a'.repeat(501);
       const response = await request(app).post('/api/todos').send({
@@ -57,6 +63,20 @@ describe('TODO API', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return todos with correct structure', async () => {
+      // まずTODOを作成
+      await request(app).post('/api/todos').send({ text: 'Structure test' });
+      const response = await request(app).get('/api/todos');
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBeGreaterThan(0);
+      const todo = response.body[0];
+      expect(todo).toHaveProperty('id');
+      expect(todo).toHaveProperty('text');
+      expect(todo).toHaveProperty('completed');
+      expect(todo).toHaveProperty('createdAt');
+      expect(todo).toHaveProperty('updatedAt');
     });
   });
 
